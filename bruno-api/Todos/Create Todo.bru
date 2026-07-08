@@ -1,0 +1,28 @@
+meta {
+  name: Create Todo Under Category
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/todos
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "projectId": "7ef89c12-e9ad-44c0-b112-9d10f21de88a",
+    "category": null,
+    "title": "Write Service",
+    "description": "Write Controller and Service",
+    "status": "PENDING",
+    "priority": "HIGH",
+    "dueDate": "2026-12-31T23:59:59Z",
+    "assignedTo": "1a25d62f-1c8f-4d85-b14e-1fea584a558a"
+  }
+}

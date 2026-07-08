@@ -1,0 +1,11 @@
+spring:
+  # In production, we typically disable automatic schema initialization
+  # to prevent accidental data loss or lockups during deployment.
+  # If you want to enable it, change this to 'always'.
+  sql:
+    init:
+      mode: never
+
+logging:
+  level:
+    org.springframework.jdbc.datasource.init: WARN

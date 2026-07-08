@@ -1,0 +1,32 @@
+meta {
+  name: Update Todo
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/api/v1/todos/:todoId
+  body: json
+  auth: none
+}
+
+params:path {
+  todoId: 
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "projectId": "YOUR_PROJECT_UUID_HERE",
+    "categoryId": "YOUR_CATEGORY_UUID_HERE",
+    "title": "Updated Todo Title",
+    "description": "Updated description",
+    "status": "IN_PROGRESS",
+    "priority": "MEDIUM",
+    "dueDate": "2026-12-31T23:59:59Z",
+    "assignedTo": null
+  }
+}

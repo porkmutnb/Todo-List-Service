@@ -1,0 +1,29 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: backend
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/todolist
+    username: chermew
+    password: P@ssw0rd
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/schema.sql
+      continue-on-error: false
+
+app:
+  jwt:
+    secret: 9a4f2c8d3e7b1a5f6c8d9e0b1a2f3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b
+    expiration-ms: 86400000 # 24 hours
+

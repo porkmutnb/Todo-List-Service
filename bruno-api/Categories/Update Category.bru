@@ -1,0 +1,29 @@
+meta {
+  name: Update Category
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/api/v1/categories/:categoryId
+  body: json
+  auth: none
+}
+
+params:path {
+  categoryId: 
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "projectId": "YOUR_PROJECT_UUID_HERE",
+    "name": "Updated Category Name",
+    "description": "Updated description",
+    "colorCode": "#00FF00",
+    "assignedTo": null
+  }
+}

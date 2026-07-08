@@ -1,0 +1,19 @@
+meta {
+  name: Get Todo By ID
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/todos/:todoId
+  body: none
+  auth: none
+}
+
+params:path {
+  todoId: 172805ee-6d6c-4b63-abfa-867a08e16036
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}

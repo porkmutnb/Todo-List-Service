@@ -1,0 +1,25 @@
+meta {
+  name: Create Category
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/categories
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "projectId": "YOUR_PROJECT_UUID_HERE",
+    "name": "Design & Prototyping",
+    "description": "Category for designing resources",
+    "colorCode": "#FF5733",
+    "assignedTo": null
+  }
+}

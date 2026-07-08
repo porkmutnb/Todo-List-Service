@@ -1,0 +1,19 @@
+meta {
+  name: Delete Todo
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/todos/:todoId
+  body: none
+  auth: none
+}
+
+params:path {
+  todoId: 92022549-42c6-4e69-9c17-cc2212d8a99c
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}

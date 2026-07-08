@@ -1,0 +1,25 @@
+meta {
+  name: Login
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "mewcher@todo.com",
+    "password": "P@ssw0rd"
+  }
+}
+
+script:post-response {
+  const response = res.getBody();
+  if (response && response.data && response.data.accessToken) {
+    bru.setEnvVar("token", response.data.accessToken);
+  }
+}

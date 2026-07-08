@@ -1,0 +1,24 @@
+# ข้อมูล Database และ Docker
+*.db
+.docker-volumes/
+postgres_data/
+
+# ไฟล์ build ของ Java
+/target/
+.gradle/
+/build/
+
+# ไฟล์ IDE
+/backend/.idea/
+/backend/.mvn/
+/frontend/.angular/
+/frontend/.vscode/
+/frontend/dist/
+/frontend/node_modules/
+*.iml
+.metadata/
+
+# AI agent
+implementation_plan.md 
+task.md
+walkthrough.md

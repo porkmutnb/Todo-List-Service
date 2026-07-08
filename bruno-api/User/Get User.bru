@@ -1,0 +1,19 @@
+meta {
+  name: Get User
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/users//:userId
+  body: none
+  auth: none
+}
+
+params:path {
+  userId: 07dc6352-5912-4109-bf19-cd43907f5db5
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}

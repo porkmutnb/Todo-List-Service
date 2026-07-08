@@ -1,0 +1,19 @@
+meta {
+  name: Get Todos By Category
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/todos/:categoryId/todos
+  body: none
+  auth: none
+}
+
+params:path {
+  categoryId: 172805ee-6d6c-4b63-abfa-867a08e16036
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
