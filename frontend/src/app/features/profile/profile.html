@@ -1,0 +1,258 @@
+<div>
+  
+  <!-- Loading skeleton -->
+  @if (isLoading()) {
+    <div class="space-y-6 animate-pulse">
+      <div class="h-32 bg-slate-200 dark:bg-slate-800 rounded-2xl w-full"></div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="h-64 bg-slate-200 dark:bg-slate-800 rounded-2xl"></div>
+        <div class="lg:col-span-2 h-96 bg-slate-200 dark:bg-slate-800 rounded-2xl"></div>
+      </div>
+    </div>
+  } @else if (profile(); as p) {
+    <!-- Banner Section -->
+    <div class="relative h-32 md:h-40 bg-linear-to-r from-indigo-500 to-purple-600 rounded-2xl overflow-hidden mb-6 shadow-md">
+      <div class="absolute inset-0 bg-black/10"></div>
+      <div class="absolute bottom-4 left-6 md:left-8 flex items-end gap-4">
+        <!-- Profile Avatar Wrapper -->
+        <div class="relative group w-16 h-16 md:w-20 md:h-20 rounded-full bg-white dark:bg-slate-850 p-1 shadow-lg border-2 border-indigo-150 shrink-0">
+          @if (avatarBase64() || p.avatarUrl) {
+            <img [src]="avatarBase64() || p.avatarUrl" class="w-full h-full rounded-full object-cover" />
+          } @else {
+            <div class="w-full h-full rounded-full flex items-center justify-center text-3xl font-extrabold text-indigo-600 uppercase">
+              {{ p.fullName.charAt(0) }}
+            </div>
+          }
+          
+          <!-- Image Upload Overlay Trigger (Only available in Edit Mode) -->
+          @if (isEditing()) {
+            <button 
+              type="button" 
+              (click)="fileInput.click()" 
+              class="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer duration-200"
+              title="Change Profile Picture">
+              <!-- Camera SVG Icon -->
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </button>
+            <input 
+              #fileInput 
+              type="file" 
+              (change)="onFileSelected($event)" 
+              accept="image/png, image/jpeg" 
+              class="hidden" />
+          }
+        </div>
+        <div class="mb-1">
+          <h1 class="text-xl md:text-2xl font-bold text-white leading-tight">
+            {{ p.fullName }}
+          </h1>
+          <p class="text-xs md:text-sm text-indigo-100 font-medium">
+            Account Status: 
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-200 border border-emerald-500/30 ml-1 uppercase">
+              {{ p.status }}
+            </span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- User Summary Info Card -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs flex flex-col justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4">
+            User Summary
+          </h3>
+          <div class="space-y-4">
+            <div>
+              <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Email Address</p>
+              <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">{{ p.email }}</p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Gender / Bio</p>
+              <p class="text-sm font-semibold text-slate-850 dark:text-slate-200 capitalize">
+                {{ p.bio || 'Not Specified' }}
+              </p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Member Since</p>
+              <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                {{ p.createdAt | date:'mediumDate' }}
+              </p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Last Profile Update</p>
+              <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                {{ p.updatedAt | date:'medium' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8">
+          <button 
+            (click)="toggleEdit()"
+            type="button"
+            class="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl border transition-colors cursor-pointer"
+            [class]="isEditing() ? 'text-slate-700 bg-slate-100 border-slate-200 hover:bg-slate-200 dark:text-slate-350 dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700' : 'text-white bg-indigo-600 border-transparent hover:bg-indigo-750 dark:bg-indigo-500 dark:hover:bg-indigo-600'">
+            @if (isEditing()) {
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              <span>Cancel Edit</span>
+            } @else {
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              <span>Edit Profile</span>
+            }
+          </button>
+        </div>
+      </div>
+
+      <!-- Edit Form Card -->
+      <div class="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-6">
+          {{ isEditing() ? 'Modify Profile Information' : 'Profile Settings' }}
+        </h3>
+
+        <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="space-y-6">
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Full Name -->
+            <div>
+              <label for="fullName" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Full Name
+              </label>
+              <input 
+                id="fullName" 
+                type="text" 
+                formControlName="fullName"
+                [readonly]="!isEditing()"
+                [class]="!isEditing() ? 'bg-slate-50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 text-slate-500' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white'"
+                class="mt-1 block w-full px-3 py-2 border rounded-lg shadow-xs focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors outline-hidden" />
+              @if (isEditing() && fullName?.invalid && fullName?.touched) {
+                <p class="mt-1 text-xs text-rose-600 dark:text-rose-400">
+                  Full name is required.
+                </p>
+              }
+            </div>
+
+            <!-- Email (readonly / restricted or active based on API capability) -->
+            <div>
+              <label for="email" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Email Address
+              </label>
+              <input 
+                id="email" 
+                type="email" 
+                formControlName="email"
+                [readonly]="!isEditing()"
+                [class]="!isEditing() ? 'bg-slate-50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 text-slate-500' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white'"
+                class="mt-1 block w-full px-3 py-2 border rounded-lg shadow-xs focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors outline-hidden" />
+              @if (isEditing() && email?.invalid && email?.touched) {
+                <p class="mt-1 text-xs text-rose-600 dark:text-rose-400">
+                  Please enter a valid email.
+                </p>
+              }
+            </div>
+
+            <!-- Gender Dropdown -->
+            <div>
+              <label for="bio" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Gender / Bio
+              </label>
+              <select 
+                id="bio"
+                formControlName="bio"
+                [disabled]="!isEditing()"
+                [class]="!isEditing() ? 'bg-slate-50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 text-slate-500' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white'"
+                class="mt-1 block w-full px-3 py-2 border rounded-lg shadow-xs focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors outline-hidden">
+                <option value="">Unspecified</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Passwords updates (Only visible in edit mode) -->
+          @if (isEditing()) {
+            <div class="border-t border-slate-100 dark:border-slate-800 pt-6 space-y-6">
+              <h4 class="text-sm font-bold text-slate-800 dark:text-slate-300">
+                Change Password (Optional)
+              </h4>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Current Password -->
+                <div>
+                  <label for="password" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                    Current Password
+                  </label>
+                  <input 
+                    id="password" 
+                    type="password" 
+                    formControlName="password"
+                    placeholder="••••••••"
+                    class="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg shadow-xs focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-slate-900 dark:text-white transition-colors outline-hidden" />
+                  <p class="mt-1 text-xs text-slate-400">
+                    Required only if you are changing password or email.
+                  </p>
+                </div>
+
+                <!-- New Password -->
+                <div>
+                  <label for="newPassword" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                    New Password
+                  </label>
+                  <input 
+                    id="newPassword" 
+                    type="password" 
+                    formControlName="newPassword"
+                    placeholder="••••••••"
+                    class="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg shadow-xs focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-slate-900 dark:text-white transition-colors outline-hidden" />
+                  @if (newPassword?.invalid && newPassword?.touched) {
+                    <p class="mt-1 text-xs text-rose-600 dark:text-rose-400">
+                      New password must be at least 6 characters.
+                    </p>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit changes -->
+            <div class="flex justify-end pt-4">
+              <button 
+                type="submit"
+                [disabled]="isSaving() || profileForm.invalid"
+                class="flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-semibold rounded-xl text-white bg-indigo-600 hover:bg-indigo-750 dark:bg-indigo-500 dark:hover:bg-indigo-650 transition-colors focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+                @if (isSaving()) {
+                  <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Saving...</span>
+                } @else {
+                  <span>Save Changes</span>
+                }
+              </button>
+            </div>
+          } @else {
+            <div class="rounded-xl bg-slate-50 dark:bg-slate-950 p-4 text-xs text-slate-500 dark:text-slate-400 flex items-start gap-2 border border-slate-100 dark:border-slate-900">
+              <svg class="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Click "Edit Profile" on the left card to update your name, gender, bio, email, or change your account password.</span>
+            </div>
+          }
+
+        </form>
+      </div>
+
+    </div>
+  }
+</div>

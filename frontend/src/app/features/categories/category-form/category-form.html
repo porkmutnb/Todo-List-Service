@@ -1,0 +1,306 @@
+<div class="space-y-6">
+  <!-- Shared Breadcrumb Navigation -->
+  <app-breadcrumb [items]="breadcrumbs()"></app-breadcrumb>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-xs animate-pulse space-y-4">
+      <div class="h-6 bg-slate-200 dark:bg-slate-800 rounded-md w-1/4"></div>
+      <div class="h-10 bg-slate-200 dark:bg-slate-800 rounded-md w-full"></div>
+      <div class="h-28 bg-slate-200 dark:bg-slate-800 rounded-md w-full"></div>
+    </div>
+  } @else {
+    <!-- Form Card -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-xs transition-colors duration-300">
+      
+      <!-- Card Header -->
+      <div class="flex items-center justify-between pb-6 border-b border-slate-100 dark:border-slate-800 mb-6">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+            @switch (mode()) {
+              @case ('create') { Create New Category }
+              @case ('view') { Category Info }
+              @case ('edit') { Edit Category }
+            }
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Categories help group task items in your project workspace
+          </p>
+        </div>
+
+        <span 
+          [class]="mode() === 'view' ? 'bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-slate-350' : 
+                   mode() === 'edit' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-500/20' : 
+                   'bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'"
+          class="px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">
+          {{ mode() }} Mode
+        </span>
+      </div>
+
+      <!-- Core Form -->
+      <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        
+        <!-- Category Name -->
+        <div>
+          <label for="name" class="block text-sm font-semibold text-slate-700 dark:text-slate-350">
+            Category Name <span class="text-rose-500">*</span>
+          </label>
+          <input 
+            id="name" 
+            type="text" 
+            formControlName="name"
+            placeholder="e.g. Frontend Development"
+            class="mt-1 block w-full px-3 py-2 border rounded-lg shadow-xs sm:text-sm outline-hidden transition-colors"
+            [class]="name?.invalid && name?.touched ? 'border-rose-300 focus:ring-rose-500 focus:border-rose-500' : 'border-slate-300 dark:border-slate-700 focus:ring-indigo-500 focus:border-indigo-500'"
+            [class.bg-slate-50]="mode() === 'view'"
+            [class.dark:bg-slate-950]="mode() === 'view'"
+            [class.text-slate-550]="mode() === 'view'" />
+          
+          @if (mode() !== 'view' && name?.invalid && name?.touched) {
+            <p class="mt-1 text-xs text-rose-600 dark:text-rose-450">
+              @if (name?.errors?.['required']) { Category name is required. }
+              @if (name?.errors?.['maxlength']) { Name cannot exceed 100 characters. }
+            </p>
+          }
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label for="description" class="block text-sm font-semibold text-slate-700 dark:text-slate-350">
+            Description
+          </label>
+          <textarea 
+            id="description" 
+            rows="3" 
+            formControlName="description"
+            placeholder="Describe the scope of tasks belonging to this category..."
+            class="mt-1 block w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg shadow-xs sm:text-sm outline-hidden focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            [class.bg-slate-50]="mode() === 'view'"
+            [class.dark:bg-slate-950]="mode() === 'view'"
+            [class.text-slate-550]="mode() === 'view'"></textarea>
+        </div>
+
+        <!-- Color Code Selection -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 dark:text-slate-350 mb-2">
+            Category Color Theme
+          </label>
+          
+          <div class="flex items-center gap-4">
+            <!-- Active Preview Box -->
+            <div 
+              [style.background-color]="colorCode?.value"
+              class="w-12 h-12 rounded-xl shadow-xs border border-white dark:border-slate-850 shrink-0 transition-all duration-300">
+            </div>
+
+            <!-- Predefined Select Grid -->
+            @if (mode() !== 'view') {
+              <div class="flex flex-wrap gap-2">
+                @for (c of colorPalette; track c.value) {
+                  <button 
+                    type="button"
+                    (click)="selectColor(c.value)"
+                    [style.background-color]="c.value"
+                    [class.ring-2]="colorCode?.value === c.value"
+                    [class.ring-indigo-500]="colorCode?.value === c.value"
+                    [class.ring-offset-2]="colorCode?.value === c.value"
+                    [class.dark:ring-offset-slate-900]="colorCode?.value === c.value"
+                    class="w-8 h-8 rounded-full border border-white dark:border-slate-800 transition-transform hover:scale-110 cursor-pointer"
+                    [title]="c.name">
+                  </button>
+                }
+              </div>
+            } @else {
+              <span class="text-xs text-slate-450 dark:text-slate-550 italic">Theme color set to {{ colorCode?.value }}</span>
+            }
+          </div>
+        </div>
+
+        <!-- Footer Buttons -->
+        <div class="flex justify-end gap-3 pt-6 border-t border-slate-100 dark:border-slate-800">
+          
+          @if (mode() === 'view') {
+            <a 
+              [routerLink]="['/projects', projectId()]"
+              class="px-5 py-2.5 text-sm font-semibold rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-750 dark:border-slate-850 dark:hover:bg-slate-800 dark:text-slate-300 transition-colors">
+              Back to Project
+            </a>
+            
+            <button 
+              type="button"
+              (click)="switchToEdit()"
+              class="px-5 py-2.5 text-sm font-semibold rounded-xl text-white bg-indigo-600 hover:bg-indigo-750 dark:bg-indigo-500 dark:hover:bg-indigo-600 shadow-xs transition-colors cursor-pointer">
+              Edit Category
+            </button>
+          } @else {
+            <a 
+              [routerLink]="mode() === 'edit' ? ['/projects', projectId(), 'categories', categoryId()] : ['/projects', projectId()]"
+              class="px-5 py-2.5 text-sm font-semibold rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-750 dark:border-slate-850 dark:hover:bg-slate-800 dark:text-slate-300 transition-colors">
+              Cancel
+            </a>
+            
+            <button 
+              type="submit"
+              [disabled]="isSaving() || categoryForm.invalid"
+              class="px-5 py-2.5 text-sm font-semibold rounded-xl text-white bg-indigo-600 hover:bg-indigo-750 dark:bg-indigo-500 dark:hover:bg-indigo-600 shadow-xs transition-colors flex items-center gap-2 cursor-pointer">
+              @if (isSaving()) {
+                <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Saving...</span>
+              } @else {
+                <span>Save Category</span>
+              }
+            </button>
+          }
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Tasks under this Category Section -->
+    @if (mode() === 'view') {
+      <div class="mt-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-xs transition-colors duration-300">
+        
+        <!-- Header: Title & Create Todo button -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-slate-100 dark:border-slate-800 mb-6">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Tasks in this Category</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-450 mt-1">Manage todos and workflow items grouped under this category</p>
+          </div>
+          <div>
+            <!-- Create Todo with query parameter of categoryId -->
+            <a 
+              [routerLink]="['/projects', projectId(), 'todos', 'new']"
+              [queryParams]="{ categoryId: categoryId() }"
+              class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-750 dark:bg-indigo-500 dark:hover:bg-indigo-600 rounded-xl transition-colors cursor-pointer shadow-xs">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add Task</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Todos Table -->
+        @if (isTodosLoading()) {
+          <div class="space-y-4 animate-pulse">
+            <div class="h-10 bg-slate-100 dark:bg-slate-800 rounded-lg"></div>
+            <div class="h-20 bg-slate-100 dark:bg-slate-800 rounded-lg"></div>
+          </div>
+        } @else {
+          <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs bg-white dark:bg-slate-900 transition-colors">
+            <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800 text-left text-sm text-slate-700 dark:text-slate-350">
+              <thead class="bg-slate-50 dark:bg-slate-950/40 text-xs font-semibold text-slate-750 dark:text-slate-300 uppercase tracking-wider select-none">
+                <tr>
+                  <th class="px-6 py-3">Status</th>
+                  <th class="px-6 py-3">Task Title</th>
+                  <th class="px-6 py-3">Assignee</th>
+                  <th class="px-6 py-3">Created At</th>
+                  <th class="px-6 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+                @for (todo of categoryTodos(); track todo.id) {
+                  <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/10 transition-colors">
+                    
+                    <!-- Status Badge -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      @switch (todo.status) {
+                        @case ('pending') {
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400">Pending</span>
+                        }
+                        @case ('in_progress') {
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">In Progress</span>
+                        }
+                        @case ('completed') {
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">Completed</span>
+                        }
+                      }
+                    </td>
+
+                    <!-- Title & Description -->
+                    <td class="px-6 py-4">
+                      <div class="text-sm font-semibold text-slate-900 dark:text-white">
+                        {{ todo.title }}
+                      </div>
+                      @if (todo.description) {
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                          {{ todo.description }}
+                        </div>
+                      }
+                    </td>
+
+                    <!-- Assignee Name -->
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
+                      @if (todo.assignedTo) {
+                        <div class="flex items-center gap-1.5">
+                          <div class="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase">
+                            {{ (userCache()[todo.assignedTo] || 'U').charAt(0) }}
+                          </div>
+                          <span>{{ userCache()[todo.assignedTo] || 'Loading...' }}</span>
+                        </div>
+                      } @else {
+                        <span class="text-slate-400 dark:text-slate-600 italic">Unassigned</span>
+                      }
+                    </td>
+
+                    <!-- Date -->
+                    <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-550 dark:text-slate-400">
+                      {{ todo.createdAt | date:'mediumDate' }}
+                    </td>
+
+                    <!-- Actions -->
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-xs font-medium">
+                      <div class="flex items-center justify-end gap-1.5">
+                        <a 
+                          [routerLink]="['/projects', projectId(), 'todos', todo.id]"
+                          class="p-1.5 text-slate-550 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                          title="View Task">
+                          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        </a>
+                        <a 
+                          [routerLink]="['/projects', projectId(), 'todos', todo.id, 'edit']"
+                          class="p-1.5 text-slate-550 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                          title="Edit Task">
+                          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
+                        </a>
+                        <button 
+                          (click)="deleteTodo(todo.id, todo.title)"
+                          type="button"
+                          class="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-455 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                          title="Delete Task">
+                          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-slate-400 dark:text-slate-500 italic bg-white dark:bg-slate-900">
+                      <div class="flex flex-col items-center justify-center gap-2">
+                        <svg class="w-8 h-8 text-slate-300 dark:text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        <span>No tasks belong to this category yet.</span>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

@@ -1,0 +1,220 @@
+<div class="space-y-6">
+  <!-- Shared Breadcrumb Navigation -->
+  <app-breadcrumb [items]="breadcrumbs()"></app-breadcrumb>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-xs animate-pulse space-y-4">
+      <div class="h-6 bg-slate-200 dark:bg-slate-800 rounded-md w-1/4"></div>
+      <div class="h-10 bg-slate-200 dark:bg-slate-800 rounded-md w-full"></div>
+      <div class="h-28 bg-slate-200 dark:bg-slate-800 rounded-md w-full"></div>
+    </div>
+  } @else {
+    <!-- Form Card -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-xs transition-colors duration-300">
+      
+      <!-- Card Header -->
+      <div class="flex items-center justify-between pb-6 border-b border-slate-100 dark:border-slate-800 mb-6">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+            @switch (mode()) {
+              @case ('create') { Create New Task }
+              @case ('view') { Task Info }
+              @case ('edit') { Edit Task }
+            }
+          </h2>
+          <p class="text-xs text-slate-550 dark:text-slate-400 mt-1">
+            Tasks define the work items to be completed inside your workspace
+          </p>
+        </div>
+
+        <span 
+          [class]="mode() === 'view' ? 'bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-slate-350' : 
+                   mode() === 'edit' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-500/20' : 
+                   'bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'"
+          class="px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">
+          {{ mode() }} Mode
+        </span>
+      </div>
+
+      <!-- Core Form -->
+      <form [formGroup]="todoForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        
+        <!-- Task Title -->
+        <div>
+          <label for="title" class="block text-sm font-semibold text-slate-700 dark:text-slate-350">
+            Task Title <span class="text-rose-500">*</span>
+          </label>
+          <input 
+            id="title" 
+            type="text" 
+            formControlName="title"
+            placeholder="e.g. Design Landing Page Mockup"
+            class="mt-1 block w-full px-3 py-2 border rounded-lg shadow-xs sm:text-sm outline-hidden transition-colors"
+            [class]="title?.invalid && title?.touched ? 'border-rose-300 focus:ring-rose-500 focus:border-rose-500' : 'border-slate-300 dark:border-slate-700 focus:ring-indigo-500 focus:border-indigo-500'"
+            [class.bg-slate-50]="mode() === 'view'"
+            [class.dark:bg-slate-950]="mode() === 'view'"
+            [class.text-slate-550]="mode() === 'view'" />
+          
+          @if (mode() !== 'view' && title?.invalid && title?.touched) {
+            <p class="mt-1 text-xs text-rose-600 dark:text-rose-450">
+              @if (title?.errors?.['required']) { Task title is required. }
+              @if (title?.errors?.['maxlength']) { Title cannot exceed 255 characters. }
+            </p>
+          }
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label for="description" class="block text-sm font-semibold text-slate-700 dark:text-slate-350">
+            Description
+          </label>
+          <textarea 
+            id="description" 
+            rows="3" 
+            formControlName="description"
+            placeholder="Provide context, acceptance criteria, or links..."
+            class="mt-1 block w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg shadow-xs sm:text-sm outline-hidden focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            [class.bg-slate-50]="mode() === 'view'"
+            [class.dark:bg-slate-950]="mode() === 'view'"
+            [class.text-slate-550]="mode() === 'view'"></textarea>
+        </div>
+
+        <!-- Controls grid (Status, Priority, Due Date, Category, Assignee) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+          
+          <!-- Category Selection -->
+          <div>
+            <label for="categoryId" class="block text-sm font-semibold text-slate-700 dark:text-slate-350">
+              Category
+            </label>
+            <select 
+              id="categoryId"
+              formControlName="categoryId"
+              class="mt-1 block w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg shadow-xs sm:text-sm outline-hidden focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+              [class.bg-slate-50]="mode() === 'view'"
+              [class.dark:bg-slate-950]="mode() === 'view'"
+              [class.text-slate-550]="mode() === 'view'">
+              <option [value]="null">No Category (Standalone Task)</option>
+              @for (cat of projectCategories(); track cat.id) {
+                <option [value]="cat.id">{{ cat.name }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Assignee Selection -->
+          <div>
+            <label for="assignedTo" class="block text-sm font-semibold text-slate-700 dark:text-slate-350">
+              Assignee
+            </label>
+            <select 
+              id="assignedTo"
+              formControlName="assignedTo"
+              class="mt-1 block w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg shadow-xs sm:text-sm outline-hidden focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+              [class.bg-slate-50]="mode() === 'view'"
+              [class.dark:bg-slate-950]="mode() === 'view'"
+              [class.text-slate-550]="mode() === 'view'">
+              <option [value]="null">Unassigned</option>
+              @for (user of assignableUsers(); track user.userId) {
+                <option [value]="user.userId">{{ user.fullName }} (Me)</option>
+              }
+            </select>
+          </div>
+
+          <!-- Status Dropdown -->
+          <div>
+            <label for="status" class="block text-sm font-semibold text-slate-700 dark:text-slate-350">
+              Status
+            </label>
+            <select 
+              id="status"
+              formControlName="status"
+              class="mt-1 block w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg shadow-xs sm:text-sm outline-hidden focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+              [class.bg-slate-50]="mode() === 'view'"
+              [class.dark:bg-slate-950]="mode() === 'view'"
+              [class.text-slate-550]="mode() === 'view'">
+              @for (s of statuses; track s.value) {
+                <option [value]="s.value">{{ s.label }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Priority Dropdown -->
+          <div>
+            <label for="priority" class="block text-sm font-semibold text-slate-700 dark:text-slate-350">
+              Priority
+            </label>
+            <select 
+              id="priority"
+              formControlName="priority"
+              class="mt-1 block w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg shadow-xs sm:text-sm outline-hidden focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+              [class.bg-slate-50]="mode() === 'view'"
+              [class.dark:bg-slate-950]="mode() === 'view'"
+              [class.text-slate-550]="mode() === 'view'">
+              @for (p of priorities; track p.value) {
+                <option [value]="p.value">{{ p.label }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Due Date -->
+          <div>
+            <label for="dueDate" class="block text-sm font-semibold text-slate-700 dark:text-slate-350">
+              Due Date
+            </label>
+            <input 
+              id="dueDate" 
+              type="date" 
+              formControlName="dueDate"
+              class="mt-1 block w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg shadow-xs sm:text-sm outline-hidden focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+              [class.bg-slate-50]="mode() === 'view'"
+              [class.dark:bg-slate-950]="mode() === 'view'"
+              [class.text-slate-550]="mode() === 'view'" />
+          </div>
+
+        </div>
+
+        <!-- Footer Buttons -->
+        <div class="flex justify-end gap-3 pt-6 border-t border-slate-100 dark:border-slate-800">
+          
+          @if (mode() === 'view') {
+            <a 
+              [routerLink]="['/projects', projectId()]"
+              class="px-5 py-2.5 text-sm font-semibold rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-750 dark:border-slate-850 dark:hover:bg-slate-800 dark:text-slate-300 transition-colors">
+              Back to Project
+            </a>
+            
+            <button 
+              type="button"
+              (click)="switchToEdit()"
+              class="px-5 py-2.5 text-sm font-semibold rounded-xl text-white bg-indigo-600 hover:bg-indigo-750 dark:bg-indigo-500 dark:hover:bg-indigo-600 shadow-xs transition-colors cursor-pointer">
+              Edit Task
+            </button>
+          } @else {
+            <a 
+              [routerLink]="mode() === 'edit' ? ['/projects', projectId(), 'todos', todoId()] : ['/projects', projectId()]"
+              class="px-5 py-2.5 text-sm font-semibold rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-750 dark:border-slate-850 dark:hover:bg-slate-800 dark:text-slate-300 transition-colors">
+              Cancel
+            </a>
+            
+            <button 
+              type="submit"
+              [disabled]="isSaving() || todoForm.invalid"
+              class="px-5 py-2.5 text-sm font-semibold rounded-xl text-white bg-indigo-600 hover:bg-indigo-750 dark:bg-indigo-500 dark:hover:bg-indigo-600 shadow-xs transition-colors flex items-center gap-2 cursor-pointer">
+              @if (isSaving()) {
+                <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Saving...</span>
+              } @else {
+                <span>Save Task</span>
+              }
+            </button>
+          }
+        </div>
+
+      </form>
+    </div>
+  }
+</div>
